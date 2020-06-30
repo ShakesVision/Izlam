@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit Image Extraction</title>
+    <style>
+        body {
+            background-color: black;
+            text-align: center;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .meme-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .index {
+
+            margin: 10px;
+        }
+
+        .url {
+            font-size: small;
+        }
+
+        .loadBtn {
+            width: 200px;
+            padding: 10px;
+            background-color: white;
+            color: black;
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container"></div>
+    <center><button class="loadBtn" onclick="loadMore()">Load More</button></center>
+    <script>
+        let uri = 'https://www.reddit.com/r/izlam.json';
+        let after = '';
+
+        fetch(uri)
+            .then(res => res.json())
+            .then((out) => {
+                console.log('Checkout this JSON! ', out);
+                after = out.data.after;
+                addImage(out);
+            })
+            .catch(err => { throw err });
+
+        function addImage(out) {
+            out.data.children.forEach((a, i) => {
+                var url = a.data.url;
+                console.log('Url:', i, '=>', url);
+                var div = document.createElement("div");
+                div.setAttribute("class", "meme-image");
+                let staticHtml = `
+                <div class='index'>${i}</div>
+                <div class='url'>${url}</div><br>`;
+                if (url.startsWith("https://v.redd"))
+                    div.innerHTML = `${staticHtml} <div> <video controls><source src="${url}" type="video"></source></video>`;
+                else div.innerHTML = `${staticHtml} <div> <img src='${url}'> </div>`;
+
+                document.querySelector(".container").appendChild(div);
+            });
+
+        }
+        function loadMore() {
+            let uri2 = `${uri}?after=${after}`;
+            fetch(uri2)
+                .then(res => res.json())
+                .then((out) => {
+                    console.log('Checkout this JSON! ', out);
+                    after = out.data.after;
+                    addImage(out);
+                });
+        }
+    
+    </script>
+
+</body>
+
+</html>
